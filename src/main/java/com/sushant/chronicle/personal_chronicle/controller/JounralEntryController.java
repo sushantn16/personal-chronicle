@@ -5,9 +5,11 @@ import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -41,5 +43,27 @@ public class JounralEntryController {
         Optional<JournalEntry> optionalEntry = journalEntryRepository.findById(id);
 
         return optionalEntry.map(entry -> ResponseEntity.ok(entry)).orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<JournalEntry> updateEntry(@PathVariable Long id, @RequestBody JournalEntry journalEntry){
+        return journalEntryRepository.findById(id)
+            .map(existingEntry -> {
+                existingEntry.setTitle(journalEntry.getTitle());
+                existingEntry.setContent(journalEntry.getContent());
+                JournalEntry updatedEntry = journalEntryRepository.save(existingEntry);
+                return ResponseEntity.ok(updatedEntry);
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEntry(@PathVariable Long id){
+        return journalEntryRepository.findById(id)
+            .map(existingEntry -> {
+                journalEntryRepository.delete(existingEntry);
+                return ResponseEntity.noContent().<Void>build();
+            })
+            .orElse(ResponseEntity.notFound().build());
     }
 }
