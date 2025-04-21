@@ -1,6 +1,7 @@
 package com.sushant.chronicle.personal_chronicle.model;
 
 import jakarta.persistence.GeneratedValue;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,10 +24,12 @@ public class JournalEntry {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Title is mandatory")
     @Column(nullable = false)
     private String title;
 
     @Lob
+    @NotBlank(message = "Content is mandatory")
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
     

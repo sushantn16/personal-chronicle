@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.sushant.chronicle.personal_chronicle.model.JournalEntry;
 import com.sushant.chronicle.personal_chronicle.repository.JournalEntryRepository;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/entries")
 public class JounralEntryController {
@@ -29,7 +31,7 @@ public class JounralEntryController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public JournalEntry createEntry(@RequestBody JournalEntry journalEntry){
+    public JournalEntry createEntry(@Valid @RequestBody JournalEntry journalEntry){
         return journalEntryRepository.save(journalEntry);
     }
 
@@ -46,7 +48,7 @@ public class JounralEntryController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<JournalEntry> updateEntry(@PathVariable Long id, @RequestBody JournalEntry journalEntry){
+    public ResponseEntity<JournalEntry> updateEntry(@Valid @PathVariable Long id, @RequestBody JournalEntry journalEntry){
         return journalEntryRepository.findById(id)
             .map(existingEntry -> {
                 existingEntry.setTitle(journalEntry.getTitle());
