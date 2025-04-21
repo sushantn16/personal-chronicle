@@ -16,23 +16,24 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sushant.chronicle.personal_chronicle.model.JournalEntry;
+import com.sushant.chronicle.personal_chronicle.model.TextJournalEntry;
 import com.sushant.chronicle.personal_chronicle.repository.JournalEntryRepository;
 
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/entries")
-public class JounralEntryController {
+@RequestMapping("/api/text-entries")
+public class TextEntryController {
     private final JournalEntryRepository journalEntryRepository;
 
-    public JounralEntryController(JournalEntryRepository journalEntryRepository) {
+    public TextEntryController(JournalEntryRepository journalEntryRepository) {
         this.journalEntryRepository = journalEntryRepository;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public JournalEntry createEntry(@Valid @RequestBody JournalEntry journalEntry){
-        return journalEntryRepository.save(journalEntry);
+    public TextJournalEntry createTextEntry(@Valid @RequestBody TextJournalEntry textEntry){
+        return journalEntryRepository.save(textEntry);
     }
 
     @RequestMapping
@@ -48,15 +49,21 @@ public class JounralEntryController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<JournalEntry> updateEntry(@Valid @PathVariable Long id, @RequestBody JournalEntry journalEntry){
-        return journalEntryRepository.findById(id)
-            .map(existingEntry -> {
-                existingEntry.setTitle(journalEntry.getTitle());
-                existingEntry.setContent(journalEntry.getContent());
-                JournalEntry updatedEntry = journalEntryRepository.save(existingEntry);
-                return ResponseEntity.ok(updatedEntry);
-            })
-            .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<TextJournalEntry> updateTextEntry(@Valid @PathVariable Long id, @RequestBody TextJournalEntry textEntry){
+        Optional<JournalEntry> optionalEntry = journalEntryRepository.findById(id);
+        if (optionalEntry.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        JournalEntry existingEntry = optionalEntry.get();
+        
+        if(existingEntry instanceof TextJournalEntry) {
+            TextJournalEntry textEntryToUpdate = (TextJournalEntry) existingEntry;
+            textEntryToUpdate.setTitle(textEntry.getTitle());
+            textEntryToUpdate.setContent(textEntry.getContent());
+            return ResponseEntity.ok(journalEntryRepository.save(textEntryToUpdate));
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 
     @DeleteMapping("/{id}")
